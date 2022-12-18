@@ -363,7 +363,7 @@
 }
 
 .tab-wrapper-one {
-    margin-bottom: 30px;
+    margin-bottom: 10px;
 
     .top-seller-inner-one {
         .thumbnail {
@@ -384,13 +384,14 @@
         background: var(--background-color-1);
         border: 1px solid var(--color-border);
         border-radius: 6px;
+        justify-content: center;
         button {
-            width: 150px;
-            height: 50px;
+            width: 107px;
+            height: 38px;
             border: none;
             color: var(--color-white);
             position: relative;
-            margin: 6px;
+            // margin: 6px;
             border-radius: 6px;
             border: 1px dashed var(--color-border);
             transition: 0.3s;
@@ -404,7 +405,7 @@
                 border: transparent;
             }
             @media #{$laptop-device} {
-                width: 130px;
+                width: 110px;
             }
         }
     }

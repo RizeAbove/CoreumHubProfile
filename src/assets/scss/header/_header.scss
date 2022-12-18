@@ -224,9 +224,17 @@
 
 .rn-header {
     .logo-thumbnail {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
         padding-right: 32px;
         position: relative;
         margin-right: 17px;
+        .logo-title {
+            font-size: 24px;
+            color: white;
+        }
         @media #{$large-mobile} {
             padding-right: 0;
             margin-right: 0;
@@ -336,7 +344,7 @@
         display: flex;
         align-items: center;
         justify-content: flex-start;
-        flex-basis: 55%;
+        flex-basis: 50%;
         @media #{$lg-layout} {
             flex-basis: 35%;
         }
@@ -354,7 +362,7 @@
     .header-right {
         justify-content: flex-end;
         display: flex;
-        flex-basis: 45%;
+        flex-basis: 50%;
         align-items: center;
 
         @media #{$lg-layout} {
@@ -699,4 +707,50 @@ input[type="search"]::-webkit-search-results-decoration {
     z-index: 999;
     width: 100%;
     backdrop-filter: blur(9px);
+}
+
+.icon-setting {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--color-border);
+    text-align: center;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-body);
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+}
+
+html[data-theme="light"] .icon-setting {
+    border-color: var(--color-border-white);
+}
+
+.setting-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;    
+    gap: 15px;
+}
+
+.setting-tutorial {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    gap: 10px;
+}
+
+.select-lang {
+    padding: 8px;
+    width: 100px;
+    text-transform: uppercase;
+}
+
+html[data-theme="dark"] option {
+    background: var(--background-color-2);
 }

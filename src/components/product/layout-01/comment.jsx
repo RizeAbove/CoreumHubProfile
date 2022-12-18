@@ -1,17 +1,16 @@
 import ClientAvatar from "@ui/client-avatar";
-import { Scrollbars } from "react-custom-scrollbars";
+import clsx from "clsx";
+import { Scrollbar } from "react-scrollbars-custom";
 import { BsArrowReturnLeft } from "react-icons/bs";
 
 const Comment = ({
+    show,
     authors,
     onReturn
 }) => {
     return (
-        <div className="product_comments">
-            <Scrollbars autoHide style={{ height: "100%", overflowX: 'hidden' }}
-                renderThumbVertical={({ style, ...props }) =>
-                    <div {...props} className={'thumb-horizontal'} />
-                }>
+        <div className={clsx("product_comments", show ? '' : 'd-none')}>
+            <Scrollbar autoHide style={{ height: "100%", overflowX: 'hidden' }}>
                 <>
                     {authors?.map((author) => (
                         <div className="product_comment" key={author.name}>
@@ -31,7 +30,7 @@ const Comment = ({
                         </div>
                     ))}
                 </>
-            </Scrollbars>
+            </Scrollbar>
             <div className="comment_return" onClick={onReturn}>
                 <BsArrowReturnLeft size="20px" />
             </div>

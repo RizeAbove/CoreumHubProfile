@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import clsx from "clsx";
 import PropTypes from "prop-types";
+import { BiCategory } from "react-icons/bi";
 
-const CategoryFilter = ({ categories, onChange }) => {
+const CategoryFilter = ({ categories, onChange, show }) => {
     const [isCheck, setIsCheck] = useState([]);
 
     const handleClick = (e) => {
@@ -16,9 +18,17 @@ const CategoryFilter = ({ categories, onChange }) => {
     }, [isCheck, onChange]);
 
     return (
-        <div className="nuron-expo-filter-widget widget-category mt--30">
+        <div className="nuron-expo-filter-widget widget-category mb--30">
             <div className="inner">
-                <h5 className="widget-title">Categories</h5>
+                <h5 className="widget-title tooltip-ex">
+                    <span>
+                        <BiCategory />
+                    </span>
+                    <span className={clsx("ml--5", show ? "widget-show" : "widget-hide")}>Categories</span>
+                    {!show && (
+                        <span className="tooltiptext">Categories</span>
+                    )}
+                </h5>
                 <div className="content">
                     {Object.entries(categories).map(([key, value]) => (
                         <div className="nuron-form-check" key={key}>
@@ -30,10 +40,19 @@ const CategoryFilter = ({ categories, onChange }) => {
                                 id={`cat-check-${key}`}
                             />
                             <label
+                                id={`cat-check-${key}`}
                                 htmlFor={`cat-check-${key}`}
-                                className="text-capitalize"
+                                className={clsx("text-capitalize", "tooltip-ex")}
                             >
-                                {key} <span>({value})</span>
+                                <div className={clsx(show ? "widget-show" : "widget-hide")}>
+                                    {key} <span>({value})</span>
+                                </div>
+                                {!show && (
+                                    <>&nbsp;</>
+                                )}
+                                {!show && (
+                                    <span className="tooltiptext">{key}</span>
+                                )}
                             </label>
                         </div>
                     ))}

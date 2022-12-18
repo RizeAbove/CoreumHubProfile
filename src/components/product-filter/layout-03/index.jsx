@@ -1,9 +1,11 @@
+import { useState } from "react";
 import PropTypes from "prop-types";
-import { Scrollbars } from "react-custom-scrollbars";
+import clsx from "clsx";
+import { Scrollbar } from "react-scrollbars-custom";
+import { AiOutlineRight, AiOutlineLeft } from 'react-icons/ai';
 import ContactWidget from "./contact";
 import SortWidget from "./sort";
 import CategoryFilter from "./category-filter";
-import LevelFilter from "./level-filter";
 import PriceSort from "./price-sort";
 import PriceRangeFilter from "./price-range-filter";
 
@@ -15,21 +17,34 @@ const ProductFilter = ({
     sort,
     categories,
     levels,
-}) => (
-    <Scrollbars autoHide style={{ height: "100vh" }}
-        renderThumbVertical={({ style, ...props }) =>
-            <div {...props} className={'thumb-horizontal'} />
-        }>
-        <div className="nu-course-sidebar">
-            <ContactWidget />
-            <SortWidget onChange={sortHandler} value={sort} />
-            <CategoryFilter categories={categories} onChange={filterHandler} />
-            <LevelFilter onChange={filterHandler} levels={levels} />
-            <PriceSort onChange={sortHandler} value={sort} />
-            <PriceRangeFilter values={inputs.price} onChange={priceHandler} />
+}) => {
+    const [isShow, setIsShow] = useState(true);
+    const handleSidebar = () => {
+        setIsShow(prev => !prev);
+    }
+    return (
+        <div id="author-filter" className={clsx("author-filter", isShow ? 'nu-show-sidebar' : 'nu-hide-sidebar')}>
+            <Scrollbar className="filter_scrollbar" autoHide noScrollX={true}>
+                <div className="nu-course-sidebar">
+                    <div className={clsx("nu-btn-sidebar")} onClick={handleSidebar}>
+                        {isShow ? (
+                            <AiOutlineLeft size={22} />
+                        ) : (
+                            <AiOutlineRight size={22} />
+                        )}
+                    </div>
+                    <ContactWidget show={isShow} />
+                    <CategoryFilter show={isShow} categories={categories} onChange={filterHandler} />
+                    <SortWidget show={isShow} onChange={sortHandler} value={sort} />
+                    <PriceSort show={isShow} onChange={sortHandler} value={sort} />
+                    {isShow && (
+                        <PriceRangeFilter values={inputs.price} onChange={priceHandler} />
+                    )}
+                </div>
+            </Scrollbar>
         </div>
-    </Scrollbars>
-);
+    )
+};
 
 ProductFilter.propTypes = {
     sortHandler: PropTypes.func,
