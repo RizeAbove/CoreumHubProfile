@@ -1,10 +1,7 @@
 import { useReducer, useState, useEffect, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import clsx from "clsx";
-import { Scrollbar } from "react-scrollbars-custom";
-import TabContent from "react-bootstrap/TabContent";
 import TabContainer from "react-bootstrap/TabContainer";
-import TabPane from "react-bootstrap/TabPane";
 import Nav from "react-bootstrap/Nav";
 import { StickyContainer, Sticky } from 'react-sticky';
 import { SlClose } from 'react-icons/sl';
@@ -17,23 +14,20 @@ import AuthorProfileArea from "@containers/author-profile";
 import { SectionTitleType, ProductType } from "@utils/types";
 import { flatDeep } from "@utils/methods";
 import { shuffleArray } from "@utils/methods";
-import CollectionArea from "@containers/collection/layout-01";
-
-import SortableExplorer from "./sortable-explorer";
-import collectionsData from "../../../data/collections.json";
 import { Image } from "react-bootstrap";
+import Container from "./container";
 
 const GRID_COLUMN = {
-  GRID_2: 2,
   GRID_3: 3,
   GRID_4: 4,
-  GRID_5: 5
+  GRID_5: 5,
+  GRID_6: 6,
 }
 
 const NFT_EFFECT = {
   NO_EFFECT: 0,
   CARD_FLIP: 1,
-  SPHERE_VIEW: 2
+  WRAP_VIEW: 2
 }
 
 function reducer(state, action) {
@@ -68,28 +62,43 @@ const ExploreProductArea = ({
     sort: "newest",
     currentPage: 1,
   });
-  const [gridcolumns, setGridColumns] = useState(GRID_COLUMN.GRID_4);
+  const [gridcolumns, setGridColumns] = useState(GRID_COLUMN.GRID_3);
   const [walkThru, setWalkThru] = useState(false);
   const [effect, setEffect] = useState(NFT_EFFECT.CARD_FLIP);
+  const [categories, setCategories] = useState({});
+  const [levels, setLevels] = useState([]);
+  const [tap, setTap] = useState(1);
 
-  const onSaleProducts = shuffleArray(products).slice(0, 10);
-  const ownedProducts = shuffleArray(products).slice(0, 10);
-  const createdProducts = shuffleArray(products).slice(0, 10);
-  const likedProducts = shuffleArray(products).slice(0, 10);
+  const onSaleProducts = useRef([]);
+
+  // Generate data from products data
+  useEffect(() => {
+    const cats = flatDeep(products.map((prod) => prod.categories));
+    const categoryData = cats.reduce((obj, b) => {
+      const newObj = { ...obj };
+      newObj[b] = obj[b] + 1 || 1;
+      return newObj;
+    }, {});
+    setCategories(categoryData);
+    const levelsData = [...new Set(products.map((prod) => prod.level))];
+    setLevels(levelsData);
+
+    onSaleProducts.current = shuffleArray(products).slice(0, 10);
+  }, [products]);
 
   /* Pagination logic start */
-  const numberOfPages = Math.ceil(state.allProducts.length / POSTS_PER_PAGE);
-  const paginationHandler = (page) => {
-    dispatch({ type: "SET_PAGE", payload: page });
-    const start = (page - 1) * POSTS_PER_PAGE;
-    dispatch({
-      type: "SET_PRODUCTS",
-      payload: state.allProducts.slice(start, start + POSTS_PER_PAGE),
-    });
-    document
-      .getElementById("explore-id")
-      .scrollIntoView({ behavior: "smooth" });
-  };
+  // const numberOfPages = Math.ceil(state.allProducts.length / POSTS_PER_PAGE);
+  // const paginationHandler = (page) => {
+  //   dispatch({ type: "SET_PAGE", payload: page });
+  //   const start = (page - 1) * POSTS_PER_PAGE;
+  //   dispatch({
+  //     type: "SET_PRODUCTS",
+  //     payload: state.allProducts.slice(start, start + POSTS_PER_PAGE),
+  //   });
+  //   document
+  //     .getElementById("explore-id")
+  //     .scrollIntoView({ behavior: "smooth" });
+  // };
   /* Pagination logic end */
 
   /* Sorting logic start */
@@ -146,7 +155,7 @@ const ExploreProductArea = ({
   }, []);
 
   // Filter Method, this function is responsible for filtering the products
-  const filterMethods = (item, filterKey, value) => {
+  const filterMethods = useCallback((item, filterKey, value) => {
     if (value === "all") return false;
     const itemKey = filterKey;
     if (filterKey === "price") {
@@ -167,7 +176,7 @@ const ExploreProductArea = ({
       return !value.includes(item[itemKey]);
     }
     return item[itemKey] !== value;
-  };
+  }, []);
 
   // Filter Method, this function is responsible for filtering the products
   const itemFilterHandler = useCallback(() => {
@@ -224,17 +233,6 @@ const ExploreProductArea = ({
     });
   }, [state.allProducts]);
 
-  /* Filter logic end */
-
-  // Generate data from products data
-  const cats = flatDeep(products.map((prod) => prod.categories));
-  const categories = cats.reduce((obj, b) => {
-    const newObj = { ...obj };
-    newObj[b] = obj[b] + 1 || 1;
-    return newObj;
-  }, {});
-  const levels = [...new Set(products.map((prod) => prod.level))];
-
   return (
     <div
       className={clsx(
@@ -252,17 +250,16 @@ const ExploreProductArea = ({
             )}
           </div>
         </div>
-
         <div className="row g-5">
           <div className={clsx("rn-authore-profile-area", className)}>
-            <TabContainer defaultActiveKey="nav-profile">
+            <TabContainer defaultActiveKey="nav-auction">
               <StickyContainer>
                 <div className="container-fluid">
                   <div style={{ position: 'relative', zIndex: '99' }}>
-                    <Sticky topOffset={-85}>
+                    <Sticky topOffset={-55}>
                       {({ style }) => {
                         return (
-                          <div className="row author_header" style={{ ...style, top: '85px' }}>
+                          <div className="row author_header" style={{ ...style, top: '55px' }}>
                             <div className="col-12">
                               <div className="tab-wrapper-one">
                                 <nav className="tab-button-one">
@@ -274,54 +271,63 @@ const ExploreProductArea = ({
                                     <Nav.Link
                                       as="button"
                                       eventKey="nav-collections"
+                                      onClick={() => setTap(0)}
                                     >
                                       Collections
                                     </Nav.Link>
                                     <Nav.Link
                                       as="button"
                                       eventKey="nav-auction"
+                                      onClick={() => setTap(1)}
                                     >
                                       Auction
                                     </Nav.Link>
                                     <Nav.Link
                                       as="button"
                                       eventKey="nav-home"
+                                      onClick={() => setTap(2)}
                                     >
                                       On Sale
                                     </Nav.Link>
                                     <Nav.Link
                                       as="button"
                                       eventKey="nav-profile"
+                                      onClick={() => setTap(3)}
                                     >
                                       Owned
                                     </Nav.Link>
                                     <Nav.Link
                                       as="button"
                                       eventKey="nav-contact"
+                                      onClick={() => setTap(4)}
                                     >
                                       Created
                                     </Nav.Link>
                                     <Nav.Link
                                       as="button"
                                       eventKey="nav-liked"
+                                      onClick={() => setTap(5)}
                                     >
                                       Liked
                                     </Nav.Link>
                                     <Nav.Link
                                       as="button"
                                       eventKey="nav-activity"
+                                      onClick={() => setTap(6)}
                                     >
                                       Activity
                                     </Nav.Link>
                                     <Nav.Link
                                       as="button"
                                       eventKey="nav-games"
+                                      onClick={() => setTap(7)}
                                     >
                                       Games
                                     </Nav.Link>
                                     <Nav.Link
                                       as="button"
                                       eventKey="nav-comingsoon"
+                                      onClick={() => setTap(8)}
                                     >
                                       Coming Soon
                                     </Nav.Link>
@@ -340,11 +346,7 @@ const ExploreProductArea = ({
                                       </span>
                                       <div className="more_options_list">
                                         <ul>
-                                          <li onClick={() => handleColumns(GRID_COLUMN.GRID_2)}>
-                                            {gridcolumns === GRID_COLUMN.GRID_2 && <FiCheck />}
-                                            <span>2 Columns</span>
-                                          </li>
-                                          <li onClick={() => handleColumns(GRID_COLUMN.GRID_3)}>
+                                          {/* <li onClick={() => handleColumns(GRID_COLUMN.GRID_3)}>
                                             {gridcolumns === GRID_COLUMN.GRID_3 && <FiCheck />}
                                             <span>3 Columns</span>
                                           </li>
@@ -356,7 +358,11 @@ const ExploreProductArea = ({
                                             {gridcolumns === GRID_COLUMN.GRID_5 && <FiCheck />}
                                             <span>5 Columns</span>
                                           </li>
-                                          <hr className="mt--5 mb--5 mr--10 ml--10" />
+                                          <li onClick={() => handleColumns(GRID_COLUMN.GRID_6)}>
+                                            {gridcolumns === GRID_COLUMN.GRID_6 && <FiCheck />}
+                                            <span>6 Columns</span>
+                                          </li>
+                                          <hr className="mt--5 mb--5 mr--10 ml--10" /> */}
                                           <li onClick={() => handleEffect(NFT_EFFECT.NO_EFFECT)}>
                                             {effect === NFT_EFFECT.NO_EFFECT && <FiCheck />}
                                             <span>No Effect</span>
@@ -365,9 +371,9 @@ const ExploreProductArea = ({
                                             {effect === NFT_EFFECT.CARD_FLIP && <FiCheck />}
                                             <span>Card Flip</span>
                                           </li>
-                                          <li onClick={() => handleEffect(NFT_EFFECT.SPHERE_VIEW)}>
-                                            {effect === NFT_EFFECT.SPHERE_VIEW && <FiCheck />}
-                                            <span>Sphere View</span>
+                                          <li onClick={() => handleEffect(NFT_EFFECT.WRAP_VIEW)}>
+                                            {effect === NFT_EFFECT.WRAP_VIEW && <FiCheck />}
+                                            <span>Wrap View</span>
                                           </li>
                                           <hr className="mt--5 mb--5 mr--10 ml--10" />
                                           <li onClick={handleWalk}>
@@ -395,37 +401,7 @@ const ExploreProductArea = ({
                       filterHandler={filterHandler}
                       priceHandler={priceHandler}
                     />
-                    <div className="author-container">
-                      <Scrollbar autoHide style={{ height: "100vh" }}>
-                        <TabContent className="tab-content rn-bid-content">
-                          <TabPane className="row d-flex g-5 w-100 ml--0 mr--0" eventKey="nav-auction">
-                            <SortableExplorer gridcolumns={gridcolumns} effect={effect} products={onSaleProducts} />
-                          </TabPane>
-                          <TabPane className="row d-flex g-5 w-100 ml--0 mr--0" eventKey="nav-home">
-                            <SortableExplorer gridcolumns={gridcolumns} effect={effect} products={onSaleProducts} />
-                          </TabPane>
-                          <TabPane className="row g-5 d-flex w-100 ml--0 mr--0" eventKey="nav-profile">
-                            <SortableExplorer gridcolumns={gridcolumns} effect={effect} products={ownedProducts} />
-                          </TabPane>
-                          <TabPane className="row g-5 d-flex w-100 ml--0 mr--0" eventKey="nav-contact">
-                            <SortableExplorer gridcolumns={gridcolumns} effect={effect} products={createdProducts} />
-                          </TabPane>
-                          <TabPane className="row g-5 d-flex w-100 ml--0 mr--0" eventKey="nav-liked">
-                            <SortableExplorer gridcolumns={gridcolumns} effect={effect} products={likedProducts} />
-                          </TabPane>
-                          <TabPane className="row g-5 d-flex w-100 ml--0 mr--0" eventKey="nav-collections">
-                            <CollectionArea gridcolumns={gridcolumns} collections={collectionsData} />
-                          </TabPane>
-                          <TabPane className="row g-5 d-flex w-100 ml--0 mr--0" eventKey="nav-activity">
-                            <SortableExplorer gridcolumns={gridcolumns} effect={effect} products={likedProducts} />
-                          </TabPane>
-                          <TabPane className="row g-5 d-flex w-100 ml--0 mr--0" eventKey="nav-games">
-                          </TabPane>
-                          <TabPane className="row g-5 d-flex w-100 ml--0 mr--0" eventKey="nav-comingsoon">
-                          </TabPane>
-                        </TabContent>
-                      </Scrollbar>
-                    </div>
+                    <Container tap={tap} columns={gridcolumns} effect={effect} products={onSaleProducts.current} />
                   </div>
                 </div>
               </StickyContainer>
