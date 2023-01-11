@@ -1,6 +1,6 @@
 const testnet = true;
 export const config = {
-    API_URL: "http://192.168.103.57:5000/",
+    API_URL: "https://yourcorehub.com/",
     RPC_URL: testnet ? 'https://s-0.devnet-1.coreum.dev/' : '',
     REST_URL: testnet ? 'https://s-0.devnet-1.coreum.dev/rest/' : '',
     DATA_LAYER: testnet ? '' : '',
